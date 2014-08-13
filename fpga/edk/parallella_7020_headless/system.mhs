@@ -105,17 +105,22 @@
  PORT processing_system7_0_S_AXI_HP1_WID_pin = processing_system7_0_S_AXI_HP1_WID, DIR = I, VEC = [5:0]
  PORT processing_system7_0_S_AXI_HP1_WDATA_pin = processing_system7_0_S_AXI_HP1_WDATA, DIR = I, VEC = [63:0]
  PORT processing_system7_0_S_AXI_HP1_WSTRB_pin = processing_system7_0_S_AXI_HP1_WSTRB, DIR = I, VEC = [7:0]
+ PORT processing_system7_0_I2C0_SDA_pin = processing_system7_0_I2C0_SDA, DIR = IO
+ PORT processing_system7_0_I2C0_SCL_pin = processing_system7_0_I2C0_SCL, DIR = IO
+ PORT processing_system7_0_GPIO_I_pin = processing_system7_0_GPIO_I_0, DIR = I, VEC = [47:0]
+ PORT processing_system7_0_GPIO_O_pin = processing_system7_0_GPIO_O, DIR = O, VEC = [47:0]
+ PORT processing_system7_0_GPIO_T_pin = processing_system7_0_GPIO_T, DIR = O, VEC = [47:0]
 
 
 BEGIN processing_system7
  PARAMETER INSTANCE = processing_system7_0
  PARAMETER HW_VER = 4.03.a
- PARAMETER C_DDR_RAM_HIGHADDR = 0x1FFFFFFF
+ PARAMETER C_DDR_RAM_HIGHADDR = 0x3FFFFFFF
  PARAMETER C_EN_EMIO_CAN0 = 0
  PARAMETER C_EN_EMIO_CAN1 = 0
  PARAMETER C_EN_EMIO_ENET0 = 0
  PARAMETER C_EN_EMIO_ENET1 = 0
- PARAMETER C_EN_EMIO_I2C0 = 0
+ PARAMETER C_EN_EMIO_I2C0 = 1
  PARAMETER C_EN_EMIO_I2C1 = 0
  PARAMETER C_EN_EMIO_PJTAG = 0
  PARAMETER C_EN_EMIO_SDIO0 = 0
@@ -135,15 +140,15 @@ BEGIN processing_system7
  PARAMETER C_EN_EMIO_MODEM_UART0 = 0
  PARAMETER C_EN_EMIO_MODEM_UART1 = 0
  PARAMETER C_EN_EMIO_WDT = 0
- PARAMETER C_EN_EMIO_GPIO = 0
- PARAMETER C_EMIO_GPIO_WIDTH = 64
+ PARAMETER C_EN_EMIO_GPIO = 1
+ PARAMETER C_EMIO_GPIO_WIDTH = 48
  PARAMETER C_EN_QSPI = 1
  PARAMETER C_EN_SMC = 0
  PARAMETER C_EN_CAN0 = 0
  PARAMETER C_EN_CAN1 = 0
  PARAMETER C_EN_ENET0 = 1
  PARAMETER C_EN_ENET1 = 0
- PARAMETER C_EN_I2C0 = 0
+ PARAMETER C_EN_I2C0 = 1
  PARAMETER C_EN_I2C1 = 0
  PARAMETER C_EN_PJTAG = 0
  PARAMETER C_EN_SDIO0 = 0
@@ -271,5 +276,10 @@ BEGIN processing_system7
  PORT S_AXI_HP1_WID = processing_system7_0_S_AXI_HP1_WID
  PORT S_AXI_HP1_WDATA = processing_system7_0_S_AXI_HP1_WDATA
  PORT S_AXI_HP1_WSTRB = processing_system7_0_S_AXI_HP1_WSTRB
+ PORT I2C0_SDA = processing_system7_0_I2C0_SDA
+ PORT I2C0_SCL = processing_system7_0_I2C0_SCL
+ PORT GPIO_I = processing_system7_0_GPIO_I_0
+ PORT GPIO_O = processing_system7_0_GPIO_O
+ PORT GPIO_T = processing_system7_0_GPIO_T
 END
 

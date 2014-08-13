@@ -23,15 +23,31 @@
 
 // This version info is local to each project.
 
-`define VERSION_VALUE   32'h14031201 //Firmware version YY_MM_DD_COUNT
+// Version register is {8'Generation, 8'Platform, 8'Type, 8'Version}
+//  Please see versions.txt in the top-level fpga directory.
+// Generation 1 - Parallella-I
+// Platform   3 - E16, 7Z010, GPIO
+// Type       3 - Headless, 24 singled-ended GPIOs from EMIO
+
+// Version    1 - First 7010 type 3, 4/22/14, FH
+//            2 - Added cclk gating on e-reset, tx-disable, 5/5/14, FH
+
+`define VERSION_VALUE   {8'h01, 8'd03, 8'd03, 8'd02}
 
 // Define one of the following for target FPGA
-`define kTARGET_7Z010 1
-//`define kTARGET_7Z020 1
+`define TARGET_7Z010 1
+//`define TARGET_7Z020 1
 
 // Define one of the following for target processor
-`define kTARGET_E16 1
-//`define kTARGET_E64 1
+`define TARGET_E16 1
+//`define TARGET_E64 1
 
 // Define included features
-//`define kFEATURE_HDMI  1
+//`define FEATURE_HDMI  1
+`define FEATURE_GPIO_EMIO 1
+//`define FEATURE_GPIO_DIFF 1
+`define FEATURE_CCLK_DIV 1
+
+// Set IOSTANDARD for GPIO pins
+`define IOSTD_GPIO       "LVCMOS25"
+//`define IOSTD_GPIO       "LVDS_25"

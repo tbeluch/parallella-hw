@@ -1,0 +1,10 @@
+## CAD & assembly directories
+cad
+assy
+
+## archives
+*.zip
+
+## intermediate BOM files
+*.csv
+

@@ -20,12 +20,13 @@
   along with this program (see the file COPYING).  If not, see
   <http://www.gnu.org/licenses/>.
 */
-module ewrapper_io_tx_slow (/*AUTOARG*/
+module ewrapper_io_tx_slow
+  (/*AUTOARG*/
    // Outputs
    DATA_OUT_TO_PINS_P, DATA_OUT_TO_PINS_N, LCLK_OUT_TO_PINS_P,
    LCLK_OUT_TO_PINS_N,
    // Inputs
-   CLK_IN, CLK_IN_90, CLK_DIV_IN, CLK_RESET, IO_RESET,
+   CLK_IN, CLK_IN_90, CLK_DIV_IN, CLK_RESET, IO_RESET, elink_disable,
    DATA_OUT_FROM_DEVICE
    );
    
@@ -34,9 +35,10 @@ module ewrapper_io_tx_slow (/*AUTOARG*/
    //###########
    input        CLK_IN;     // Fast clock input from PLL/MMCM
    input        CLK_IN_90;  // Fast clock input with 90deg phase shift
-   input 	CLK_DIV_IN; // Slow clock input from PLL/MMCM
+   input        CLK_DIV_IN; // Slow clock input from PLL/MMCM
    input        CLK_RESET;
-   input 	IO_RESET;
+   input        IO_RESET;
+   input        elink_disable;
    input [71:0] DATA_OUT_FROM_DEVICE;
       
    //#############
@@ -87,9 +89,9 @@ module ewrapper_io_tx_slow (/*AUTOARG*/
    wire 	LCLK_OUT_TO_PINS_N;
 
    // Inversions for E16/E64 migration
-`ifdef kTARGET_E16
+`ifdef TARGET_E16
    wire     elink_invert = 1'b0;
-`elsif kTARGET_E64
+`elsif TARGET_E64
    wire     elink_invert = 1'b1;
 `endif
       
@@ -114,17 +116,16 @@ module ewrapper_io_tx_slow (/*AUTOARG*/
    //################################
    //# Output Buffers Instantiation
    //################################
-   genvar 	pin_count;
-   generate 
-      for (pin_count = 0; pin_count < 9; pin_count = pin_count + 1) begin: pins
-         OBUFDS #(.IOSTANDARD ("LVDS_25")) obufds_inst
-           (.O   (DATA_OUT_TO_PINS_P[pin_count]),
-            .OB  (DATA_OUT_TO_PINS_N[pin_count]),
-            .I   (tx_out[pin_count]));
-      end
-   endgenerate
 
-   OBUFDS #(.IOSTANDARD ("LVDS_25")) obufds_lclk_inst
+   OBUFTDS #(.IOSTANDARD (`IOSTD_ELINK))
+   obufds_inst [8:0]
+     (.O   (DATA_OUT_TO_PINS_P),
+      .OB  (DATA_OUT_TO_PINS_N),
+      .I   (tx_out),
+      .T   ({1'b0, {8{elink_disable}}}));  // Frame is always enabled
+
+   OBUFDS #(.IOSTANDARD (`IOSTD_ELINK))
+   obufds_lclk_inst
      (.O   (LCLK_OUT_TO_PINS_P),
       .OB  (LCLK_OUT_TO_PINS_N),
       .I   (tx_lclk_out));
@@ -133,36 +134,33 @@ module ewrapper_io_tx_slow (/*AUTOARG*/
    //# ODDR instantiation
    //#############################
    
-   genvar        oddr_cnt;
-   generate 
-      for (oddr_cnt = 0; oddr_cnt < 9; oddr_cnt = oddr_cnt + 1) begin: oddrs
-         ODDR #(
-                .DDR_CLK_EDGE  ("SAME_EDGE"), 
-		.INIT          (1'b0),
-                .SRTYPE        ("ASYNC"))
-         oddr_inst (
-                    .Q  (tx_out[oddr_cnt]),
-                    .C  (txo_lclk),
-                    .CE (1'b1),
-                    .D1 (clk_even_reg[oddr_cnt]),
-                    .D2 (clk_odd_reg[oddr_cnt]),
-                    .R  (reset),
-                    .S  (1'b0));
-      end
-   endgenerate
+   ODDR #(
+          .DDR_CLK_EDGE  ("SAME_EDGE"), 
+		  .INIT          (1'b0),
+          .SRTYPE        ("ASYNC"))
+   oddr_inst [8:0] 
+     (
+      .Q  (tx_out),
+      .C  (txo_lclk),
+      .CE (1'b1),
+      .D1 (clk_even_reg),
+      .D2 (clk_odd_reg),
+      .R  (reset),
+      .S  (1'b0));
 
    ODDR #(
           .DDR_CLK_EDGE  ("SAME_EDGE"), 
-	  .INIT          (1'b0),
+	      .INIT          (1'b0),
           .SRTYPE        ("ASYNC"))
-   oddr_lclk_inst (
-              .Q  (tx_lclk_out),
-              .C  (txo_lclk90),
-              .CE (1'b1),
-              .D1 (~elink_invert),
-              .D2 (elink_invert),
-              .R  (CLK_RESET),
-              .S  (1'b0));
+   oddr_lclk_inst
+     (
+      .Q  (tx_lclk_out),
+      .C  (txo_lclk90),
+      .CE (1'b1),
+      .D1 (~elink_invert & ~elink_disable),
+      .D2 (elink_invert & ~elink_disable),
+      .R  (CLK_RESET),
+      .S  (1'b0));
    
    //########################
    //# Data Serialization
